@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>pupcom · 小红书授权</title>
+<style>
+  :root { --ink: #0c1f1f; --ink-3: #66716f; --teal: #00736d; --line: #e7e5df; --bg: #f7f6f2; --card: #fff; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --ink: #eef2f1; --ink-3: #9aa7a5; --teal: #3fc9c1; --line: #2b3736; --bg: #0f1716; --card: #16211f; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px; background: var(--bg); color: var(--ink); font: 16px/1.7 -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif; }
+  main { width: 100%; max-width: 520px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 28px 24px; }
+  b.brand { font-size: 20px; letter-spacing: -0.02em; }
+  h1 { font-size: 20px; margin: 12px 0 6px; }
+  p { margin: 0 0 12px; color: var(--ink-3); }
+  code { display: block; padding: 12px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); word-break: break-all; font-size: 13px; color: var(--ink); }
+  button { margin-top: 12px; height: 40px; padding: 0 18px; border: 0; border-radius: 999px; background: var(--ink); color: var(--card); font: inherit; font-weight: 600; cursor: pointer; }
+  [hidden] { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <b class="brand">pupcom</b>
+  <h1 id="title">正在完成小红书授权…</h1>
+  <p id="lead">正在跳转回你电脑上的 pupcom 平台端。</p>
+  <div id="manual" hidden>
+    <p>如果没有自动跳回，请确认这台电脑上的 pupcom（127.0.0.1:5175）开着，然后把下面这段复制到「小红书对接」页的授权框里：</p>
+    <code id="code"></code>
+    <button type="button" id="copy">复制</button>
+  </div>
+</main>
+<script>
+  // 中转页：小红书把授权 code 带到这里，原样转给本机 5175 的本机后台去换令牌。
+  // 这个页面不保存、不上传任何东西；code 只有配上本机的 appSecret 才有用。
+  (function () {
+    var params = new URLSearchParams(location.search);
+    var code = params.get('code');
+    var title = document.getElementById('title');
+    var lead = document.getElementById('lead');
+    if (!code) {
+      title.textContent = '这是 pupcom 的小红书授权回调页';
+      lead.textContent = '地址里没有授权 code。请从小红书开放平台的授权链接进入。';
+      return;
+    }
+    document.getElementById('code').textContent = code;
+    document.getElementById('copy').onclick = function () {
+      navigator.clipboard.writeText(code).then(function () { document.getElementById('copy').textContent = '已复制'; });
+    };
+    setTimeout(function () { document.getElementById('manual').hidden = false; }, 2500);
+    location.replace('http://127.0.0.1:5175/api/xhs/callback' + location.search);
+  })();
+</script>
+</body>
+</html>
